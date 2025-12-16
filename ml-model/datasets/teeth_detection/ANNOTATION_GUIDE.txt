@@ -1,0 +1,15 @@
+# YOLO Annotation Format
+# Each line: class_id x_center y_center width height
+# All values normalized (0-1) relative to image dimensions
+
+# Example for a 640x480 image with a cavity at pixel (200, 150) with size 50x40:
+# class_id = 1 (cavity)
+# x_center = 200/640 = 0.3125
+# y_center = 150/480 = 0.3125  
+# width = 50/640 = 0.078125
+# height = 40/480 = 0.083333
+
+# Sample annotation (img001.txt):
+1 0.3125 0.3125 0.078125 0.083333
+0 0.6 0.4 0.1 0.12
+2 0.2 0.7 0.08 0.1

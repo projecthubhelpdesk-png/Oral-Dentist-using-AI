@@ -1,0 +1,79 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: oralcare-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: oral_care_ai
+      MYSQL_USER: oralcare
+      MYSQL_PASSWORD: oralcarepass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ../database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PHP Backend
+  php:
+    build:
+      context: ../backend-php
+      dockerfile: ../docker/Dockerfile.php
+    container_name: oralcare-php
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_NAME: oral_care_ai
+      DB_USER: oralcare
+      DB_PASS: oralcarepass
+      JWT_SECRET: your-jwt-secret-key-minimum-32-characters-long
+      ENCRYPTION_KEY: your-encryption-key-exactly-32ch
+    ports:
+      - "8080:80"
+    volumes:
+      - ../backend-php:/var/www/html
+      - scan_storage:/var/www/html/storage/scans
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # React Frontend (development)
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../docker/Dockerfile.frontend
+    container_name: oralcare-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+
+  # phpMyAdmin (optional, for development)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: oralcare-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+  scan_storage:

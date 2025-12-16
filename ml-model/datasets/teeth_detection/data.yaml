@@ -1,0 +1,17 @@
+# Teeth Detection Dataset for YOLOv8
+# Oral Care AI Project
+
+path: C:/xampp/htdocs/oral-care-ai/ml-model/datasets/teeth_detection
+train: images/train
+val: images/val
+
+# Classes
+names:
+  0: healthy_tooth
+  1: cavity
+  2: plaque
+  3: crooked_tooth
+  4: missing_tooth
+
+# Number of classes
+nc: 5

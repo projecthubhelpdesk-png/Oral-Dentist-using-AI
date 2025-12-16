@@ -1,0 +1,43 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+    
+    // User profile images
+    match /profiles/{userId}/{fileName} {
+      allow read: if true; // Public profile images
+      allow write: if isOwner(userId) && isValidImage();
+    }
+    
+    // Scan images - private, encrypted at rest
+    match /scans/{userId}/{scanId}/{fileName} {
+      // Only owner can read/write their scans
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidImage();
+    }
+    
+    // Thumbnails
+    match /thumbnails/{userId}/{scanId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow write: if false; // Only Cloud Functions can write thumbnails
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

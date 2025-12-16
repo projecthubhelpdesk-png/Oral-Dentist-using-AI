@@ -1,0 +1,37 @@
+RewriteEngine On
+
+# Pass Authorization header to PHP
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+# Handle CORS preflight OPTIONS requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+# Redirect all other API requests to api/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.(env|json|lock|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect storage directory
+<IfModule mod_rewrite.c>
+    RewriteRule ^storage/ - [F,L]
+</IfModule>

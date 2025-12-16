@@ -1,0 +1,149 @@
+{
+  "users": {
+    "user001": {
+      "id": "user001",
+      "email": "john.doe@example.com",
+      "role": "user",
+      "phoneLastFour": "4567",
+      "emailVerified": true,
+      "isActive": true,
+      "createdAt": "2024-11-01T10:00:00Z"
+    },
+    "user002": {
+      "id": "user002",
+      "email": "jane.smith@example.com",
+      "role": "user",
+      "phoneLastFour": "6543",
+      "emailVerified": true,
+      "isActive": true,
+      "createdAt": "2024-11-05T14:30:00Z"
+    },
+    "dentist001": {
+      "id": "dentist001",
+      "email": "dr.sarah.chen@dental.com",
+      "role": "dentist",
+      "phoneLastFour": "3333",
+      "emailVerified": true,
+      "isActive": true,
+      "createdAt": "2024-10-15T09:00:00Z"
+    }
+  },
+  "dentistProfiles": {
+    "profile001": {
+      "userId": "dentist001",
+      "licenseState": "CA",
+      "licenseVerified": true,
+      "specialty": "Cosmetic Dentistry",
+      "clinicName": "Bright Smile Dental",
+      "yearsExperience": 12,
+      "bio": "Dr. Chen specializes in cosmetic dentistry with over 12 years of experience.",
+      "acceptingPatients": true,
+      "consultationFeeCents": 7500,
+      "averageRating": 4.85,
+      "totalReviews": 127
+    }
+  },
+  "scans": {
+    "scan001": {
+      "userId": "user001",
+      "scanType": "basic_rgb",
+      "imageStoragePath": "scans/user001/scan001/image.jpg",
+      "status": "analyzed",
+      "captureDevice": "iPhone 14 Pro",
+      "uploadedAt": "2024-12-01T10:30:00Z",
+      "processedAt": "2024-12-01T10:31:15Z"
+    },
+    "scan002": {
+      "userId": "user001",
+      "scanType": "basic_rgb",
+      "imageStoragePath": "scans/user001/scan002/image.jpg",
+      "status": "analyzed",
+      "captureDevice": "iPhone 14 Pro",
+      "uploadedAt": "2024-12-05T14:20:00Z",
+      "processedAt": "2024-12-05T14:21:30Z"
+    },
+    "scan003": {
+      "userId": "user002",
+      "scanType": "advanced_spectral",
+      "imageStoragePath": "scans/user002/scan003/image.msi",
+      "status": "analyzed",
+      "captureDevice": "OralScan Pro 3000",
+      "uploadedAt": "2024-12-08T09:15:00Z",
+      "processedAt": "2024-12-08T09:18:45Z"
+    }
+  },
+  "analysisResults": {
+    "analysis001": {
+      "scanId": "scan001",
+      "modelType": "basic_rgb",
+      "modelVersion": "2.1.0",
+      "overallScore": 78.5,
+      "confidenceScore": 0.8923,
+      "findings": [
+        {
+          "type": "plaque_buildup",
+          "severity": "mild",
+          "location": "lower_molars",
+          "confidence": 0.87
+        },
+        {
+          "type": "gum_inflammation",
+          "severity": "minimal",
+          "location": "upper_front",
+          "confidence": 0.72
+        }
+      ],
+      "riskAreas": [
+        {"x": 120, "y": 340, "width": 80, "height": 60, "label": "plaque_buildup"}
+      ],
+      "recommendations": [
+        "Increase brushing frequency to twice daily",
+        "Consider using an electric toothbrush",
+        "Schedule professional cleaning within 3 months"
+      ],
+      "createdAt": "2024-12-01T10:31:15Z"
+    },
+    "analysis002": {
+      "scanId": "scan002",
+      "modelType": "basic_rgb",
+      "modelVersion": "2.1.0",
+      "overallScore": 82.3,
+      "confidenceScore": 0.9145,
+      "findings": [
+        {
+          "type": "healthy",
+          "severity": "none",
+          "location": "overall",
+          "confidence": 0.91
+        }
+      ],
+      "riskAreas": [],
+      "recommendations": [
+        "Continue current oral hygiene routine",
+        "Next scan recommended in 6 months"
+      ],
+      "createdAt": "2024-12-05T14:21:30Z"
+    }
+  },
+  "connections": {
+    "user001_dentist001": {
+      "patientId": "user001",
+      "dentistId": "dentist001",
+      "status": "active",
+      "initiatedBy": "patient",
+      "shareScanHistory": true,
+      "connectedAt": "2024-11-15T09:00:00Z"
+    }
+  },
+  "notifications": {
+    "notif001": {
+      "userId": "user001",
+      "type": "analysis_complete",
+      "title": "Scan Analysis Ready",
+      "message": "Your dental scan from Dec 5 has been analyzed.",
+      "data": {"scanId": "scan002"},
+      "isRead": false,
+      "createdAt": "2024-12-05T14:21:30Z"
+    }
+  }
+}

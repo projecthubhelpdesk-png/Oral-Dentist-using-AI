@@ -1,0 +1,16 @@
+# Oral Diseases Detection Dataset for YOLOv8
+# Classes: Caries, Ulcer, Tooth Discoloration, Gingivitis
+
+path: C:/xampp/htdocs/oral-care-ai/ml-model/datasets/oral-diseases
+train: images/train
+val: images/val
+
+# Number of classes
+nc: 4
+
+# Class names
+names:
+  0: Caries
+  1: Ulcer
+  2: Tooth_Discoloration
+  3: Gingivitis

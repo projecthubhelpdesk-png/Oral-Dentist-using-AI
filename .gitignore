@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+lib/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.phpunit.cache/
+
+# Storage (uploaded files)
+storage/scans/
+storage/rate_limits/
+storage/spectral/
+backend-php/storage/
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Misc
+*.bak
+*.tmp
+
+# Large ML model files (>100MB)
+*.pth
+*.pt
+*.h5
+ml-model/models/
+ml-model/runs/

@@ -1,0 +1,763 @@
+openapi: 3.0.3
+info:
+  title: Oral Care AI API
+  description: |
+    REST API for the Oral Care AI healthcare platform.
+    Supports user authentication, dental scan uploads, AI analysis, and dentist reviews.
+  version: 1.0.0
+  contact:
+    email: api@oralcare.ai
+
+servers:
+  - url: http://localhost/oral-care-ai/backend-php/api
+    description: Local XAMPP development
+  - url: https://us-central1-oralcare-ai.cloudfunctions.net/api
+    description: Firebase Cloud Functions
+
+tags:
+  - name: Auth
+    description: Authentication and authorization
+  - name: Users
+    description: User profile management
+  - name: Scans
+    description: Dental scan uploads and management
+  - name: Analysis
+    description: AI analysis results
+  - name: Dentists
+    description: Dentist profiles and reviews
+  - name: Connections
+    description: Patient-dentist relationships
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [user, dentist, admin]
+        phoneLastFour:
+          type: string
+          maxLength: 4
+        profileImageUrl:
+          type: string
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    DentistProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        licenseState:
+          type: string
+        licenseVerified:
+          type: boolean
+        specialty:
+          type: string
+        clinicName:
+          type: string
+        yearsExperience:
+          type: integer
+        bio:
+          type: string
+        acceptingPatients:
+          type: boolean
+        consultationFeeCents:
+          type: integer
+        averageRating:
+          type: number
+        totalReviews:
+          type: integer
+
+    Scan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        scanType:
+          type: string
+          enum: [basic_rgb, advanced_spectral]
+        thumbnailUrl:
+          type: string
+        status:
+          type: string
+          enum: [uploaded, processing, analyzed, failed, archived]
+        captureDevice:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+        processedAt:
+          type: string
+          format: date-time
+
+    AnalysisResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scanId:
+          type: string
+          format: uuid
+        modelType:
+          type: string
+          enum: [basic_rgb, advanced_spectral]
+        modelVersion:
+          type: string
+        overallScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        confidenceScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Finding'
+        riskAreas:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskArea'
+        recommendations:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Finding:
+      type: object
+      properties:
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [none, minimal, mild, moderate, severe]
+        location:
+          type: string
+        confidence:
+          type: number
+
+    RiskArea:
+      type: object
+      properties:
+        x:
+          type: integer
+        y:
+          type: integer
+        width:
+          type: integer
+        height:
+          type: integer
+        label:
+          type: string
+
+    DentistReview:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scanId:
+          type: string
+          format: uuid
+        dentistId:
+          type: string
+          format: uuid
+        agreesWithAi:
+          type: boolean
+        professionalAssessment:
+          type: string
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+        treatmentRecommendations:
+          type: string
+        urgencyLevel:
+          type: string
+          enum: [routine, soon, urgent, emergency]
+        followUpDays:
+          type: integer
+        reviewedAt:
+          type: string
+          format: date-time
+
+    AuthTokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        tokenType:
+          type: string
+          default: Bearer
+
+paths:
+  # ==================== AUTH ====================
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                phone:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, dentist]
+                  default: user
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/AuthTokens'
+                  - type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+        '409':
+          description: Email already exists
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/AuthTokens'
+                  - type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid refresh token
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and revoke refresh token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+
+  # ==================== USERS ====================
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    patch:
+      tags: [Users]
+      summary: Update current user profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                profileImageUrl:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated
+
+  # ==================== SCANS ====================
+  /scans:
+    get:
+      tags: [Scans]
+      summary: List user's scans
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [uploaded, processing, analyzed, failed, archived]
+        - name: scanType
+          in: query
+          schema:
+            type: string
+            enum: [basic_rgb, advanced_spectral]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of scans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Scan'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+    post:
+      tags: [Scans]
+      summary: Upload new scan
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image, scanType]
+              properties:
+                image:
+                  type: string
+                  format: binary
+                scanType:
+                  type: string
+                  enum: [basic_rgb, advanced_spectral]
+                captureDevice:
+                  type: string
+      responses:
+        '201':
+          description: Scan uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scan'
+        '400':
+          description: Invalid file or parameters
+
+  /scans/{scanId}:
+    get:
+      tags: [Scans]
+      summary: Get scan details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Scan details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scan'
+        '404':
+          description: Scan not found
+
+    delete:
+      tags: [Scans]
+      summary: Archive scan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Scan archived
+        '404':
+          description: Scan not found
+
+  /scans/{scanId}/analyze:
+    post:
+      tags: [Scans]
+      summary: Trigger AI analysis
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Analysis started
+        '400':
+          description: Scan already analyzed or invalid
+
+  # ==================== ANALYSIS ====================
+  /scans/{scanId}/analysis:
+    get:
+      tags: [Analysis]
+      summary: Get analysis results for scan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Analysis results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+        '404':
+          description: No analysis found
+
+  # ==================== DENTISTS ====================
+  /dentists:
+    get:
+      tags: [Dentists]
+      summary: List dentists
+      parameters:
+        - name: specialty
+          in: query
+          schema:
+            type: string
+        - name: acceptingPatients
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of dentists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DentistProfile'
+
+  /dentists/{dentistId}:
+    get:
+      tags: [Dentists]
+      summary: Get dentist profile
+      parameters:
+        - name: dentistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dentist profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DentistProfile'
+
+  /dentists/me:
+    get:
+      tags: [Dentists]
+      summary: Get current dentist's profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dentist profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DentistProfile'
+
+    patch:
+      tags: [Dentists]
+      summary: Update dentist profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                specialty:
+                  type: string
+                clinicName:
+                  type: string
+                bio:
+                  type: string
+                acceptingPatients:
+                  type: boolean
+                consultationFeeCents:
+                  type: integer
+      responses:
+        '200':
+          description: Profile updated
+
+  # ==================== REVIEWS ====================
+  /scans/{scanId}/reviews:
+    get:
+      tags: [Dentists]
+      summary: Get reviews for a scan
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DentistReview'
+
+    post:
+      tags: [Dentists]
+      summary: Create dentist review (dentist only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agreesWithAi:
+                  type: boolean
+                professionalAssessment:
+                  type: string
+                diagnosisCodes:
+                  type: array
+                  items:
+                    type: string
+                treatmentRecommendations:
+                  type: string
+                urgencyLevel:
+                  type: string
+                  enum: [routine, soon, urgent, emergency]
+                followUpDays:
+                  type: integer
+      responses:
+        '201':
+          description: Review created
+        '403':
+          description: Not authorized (not a dentist or not connected)
+
+  # ==================== CONNECTIONS ====================
+  /connections:
+    get:
+      tags: [Connections]
+      summary: List connections
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, active, declined, terminated]
+      responses:
+        '200':
+          description: List of connections
+
+    post:
+      tags: [Connections]
+      summary: Request connection
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetUserId]
+              properties:
+                targetUserId:
+                  type: string
+                  format: uuid
+                shareScanHistory:
+                  type: boolean
+                  default: false
+      responses:
+        '201':
+          description: Connection request created
+        '409':
+          description: Connection already exists
+
+  /connections/{connectionId}:
+    patch:
+      tags: [Connections]
+      summary: Update connection status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [active, declined, terminated]
+                shareScanHistory:
+                  type: boolean
+      responses:
+        '200':
+          description: Connection updated

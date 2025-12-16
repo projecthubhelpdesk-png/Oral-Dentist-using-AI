@@ -1,0 +1,15 @@
+{
+  "class_labels": {
+    "0": "Calculus",
+    "1": "Caries",
+    "2": "Gingivitis",
+    "3": "Mouth_Ulcer"
+  },
+  "num_classes": 4,
+  "image_size": [
+    224,
+    224
+  ],
+  "model_version": "2.0.0",
+  "dataset": "oral-diseases-kaggle"
+}

@@ -1,0 +1,78 @@
+{
+  "llm_providers": {
+    "openai": {
+      "model": "gpt-4o",
+      "vision_model": "gpt-4o",
+      "max_tokens": 2048,
+      "temperature": 0.3,
+      "enabled": true
+    },
+    "local_llama": {
+      "model": "llama-3-8b-instruct",
+      "endpoint": "http://localhost:11434/api/generate",
+      "max_tokens": 2048,
+      "temperature": 0.3,
+      "enabled": false
+    },
+    "mistral": {
+      "model": "mistral-7b-instruct",
+      "endpoint": "http://localhost:11434/api/generate",
+      "max_tokens": 2048,
+      "temperature": 0.3,
+      "enabled": false
+    }
+  },
+  "vlm_providers": {
+    "llava": {
+      "model": "llava-1.6-34b",
+      "endpoint": "http://localhost:11434/api/generate",
+      "enabled": false
+    },
+    "qwen_vl": {
+      "model": "qwen-vl-chat",
+      "endpoint": "http://localhost:11434/api/generate",
+      "enabled": false
+    }
+  },
+  "cnn_models": {
+    "efficientnet_b4": {
+      "architecture": "EfficientNetB4",
+      "input_size": [380, 380],
+      "weights": "imagenet",
+      "priority": 1
+    },
+    "efficientnet_b3": {
+      "architecture": "EfficientNetB3",
+      "input_size": [300, 300],
+      "weights": "imagenet",
+      "priority": 2
+    },
+    "resnet50": {
+      "architecture": "ResNet50",
+      "input_size": [224, 224],
+      "weights": "imagenet",
+      "priority": 3
+    },
+    "mobilenetv3": {
+      "architecture": "MobileNetV3Large",
+      "input_size": [224, 224],
+      "weights": "imagenet",
+      "priority": 4
+    }
+  },
+  "ensemble": {
+    "enabled": true,
+    "voting": "weighted",
+    "weights": {
+      "efficientnet_b4": 0.4,
+      "efficientnet_b3": 0.3,
+      "resnet50": 0.2,
+      "mobilenetv3": 0.1
+    }
+  },
+  "dental_prompts": {
+    "analysis": "You are an expert dental AI assistant. Analyze the following dental image findings and provide a comprehensive, patient-friendly explanation. Be thorough but avoid causing unnecessary alarm. Always recommend professional consultation.",
+    "report": "Generate a professional dental screening report based on the AI analysis. Include: 1) Summary of findings, 2) Severity assessment, 3) Recommended actions, 4) Home care tips. Use clear, non-technical language.",
+    "advice": "Based on the dental analysis, provide personalized oral health advice. Consider the detected conditions and their severity. Be supportive and actionable."
+  }
+}

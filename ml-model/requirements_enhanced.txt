@@ -1,0 +1,71 @@
+# Enhanced Teeth Analyzer Requirements
+# =====================================
+# Includes Advanced Pipeline with LLM/VLM support
+
+# Core ML/AI Libraries
+tensorflow>=2.13.0,<2.17.0
+numpy>=1.21.0
+pillow>=9.0.0
+opencv-python>=4.5.0
+scikit-learn>=1.0.0
+
+# CNN Architectures (EfficientNet-B4, B3, ResNet50, MobileNetV3)
+# Included in TensorFlow
+
+# YOLO Detection
+ultralytics>=8.0.0
+
+# API Framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+python-multipart>=0.0.6
+pydantic>=2.0.0
+
+# LLM Integration (Advanced Pipeline)
+openai>=1.0.0
+httpx>=0.24.0
+aiohttp>=3.8.0
+
+# Local LLM Support (Ollama) - Optional
+# ollama>=0.1.0
+
+# Data Processing
+pandas>=1.3.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Image Processing
+opencv-python>=4.5.0
+imageio>=2.15.0
+
+# Spectral TIFF Support (ODSI-DB dataset)
+tifffile>=2020.2.16
+imagecodecs>=2020.5.30
+
+# Async Support
+asyncio-throttle>=1.0.0
+
+# Utilities
+tqdm>=4.62.0
+python-dateutil>=2.8.0
+python-dotenv>=1.0.0
+
+# Development & Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# For Google Colab compatibility
+# google-colab>=1.0.0; python_version>="3.7" and platform_system=="Linux"
+
+# Optional: For local VLM models (LLaVA, Qwen-VL)
+# transformers>=4.35.0
+# torch>=2.0.0
+# accelerate>=0.24.0
+
+# Optional: For Roboflow integration
+# roboflow>=1.0.0
+# inference>=0.9.0
+
+# Alternative lightweight versions for resource-constrained environments
+# tensorflow-lite>=2.13.0  # For mobile/edge deployment
+# onnxruntime>=1.15.0      # For ONNX model deployment

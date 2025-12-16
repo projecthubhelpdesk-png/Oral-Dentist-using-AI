@@ -1,0 +1,5 @@
+healthy_tooth
+cavity
+plaque
+crooked_tooth
+missing_tooth
